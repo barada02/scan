@@ -57,6 +57,8 @@ namespace scan {
 	private: System::Windows::Forms::PictureBox^ pictureBox1;
 	private: System::Windows::Forms::PictureBox^ pictureBox2;
 	private: System::Windows::Forms::Label^ label4;
+	private: System::Windows::Forms::Label^ Seek_Count_label;
+	private: System::Windows::Forms::Label^ label5;
 
 
 
@@ -77,6 +79,9 @@ namespace scan {
 		{
 			System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(Base::typeid));
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
+			this->Seek_Count_label = (gcnew System::Windows::Forms::Label());
+			this->label5 = (gcnew System::Windows::Forms::Label());
+			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->pictureBox2 = (gcnew System::Windows::Forms::PictureBox());
 			this->panel4 = (gcnew System::Windows::Forms::Panel());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
@@ -94,7 +99,6 @@ namespace scan {
 			this->Add_Request_button = (gcnew System::Windows::Forms::Button());
 			this->Reqest_label = (gcnew System::Windows::Forms::Label());
 			this->Request_textBox = (gcnew System::Windows::Forms::TextBox());
-			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->panel1->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox2))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->pictureBox1))->BeginInit();
@@ -104,6 +108,8 @@ namespace scan {
 			// 
 			this->panel1->BackColor = System::Drawing::SystemColors::ActiveCaption;
 			this->panel1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->panel1->Controls->Add(this->Seek_Count_label);
+			this->panel1->Controls->Add(this->label5);
 			this->panel1->Controls->Add(this->label4);
 			this->panel1->Controls->Add(this->pictureBox2);
 			this->panel1->Controls->Add(this->panel4);
@@ -127,6 +133,39 @@ namespace scan {
 			this->panel1->Name = L"panel1";
 			this->panel1->Size = System::Drawing::Size(1676, 550);
 			this->panel1->TabIndex = 0;
+			// 
+			// Seek_Count_label
+			// 
+			this->Seek_Count_label->AutoSize = true;
+			this->Seek_Count_label->Font = (gcnew System::Drawing::Font(L"Microsoft YaHei UI", 12, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->Seek_Count_label->Location = System::Drawing::Point(1340, 397);
+			this->Seek_Count_label->Name = L"Seek_Count_label";
+			this->Seek_Count_label->Size = System::Drawing::Size(120, 27);
+			this->Seek_Count_label->TabIndex = 19;
+			this->Seek_Count_label->Text = L"SeekCount";
+			// 
+			// label5
+			// 
+			this->label5->AutoSize = true;
+			this->label5->Font = (gcnew System::Drawing::Font(L"Microsoft YaHei UI", 12, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label5->Location = System::Drawing::Point(1191, 397);
+			this->label5->Name = L"label5";
+			this->label5->Size = System::Drawing::Size(126, 27);
+			this->label5->TabIndex = 18;
+			this->label5->Text = L"Seek Count";
+			// 
+			// label4
+			// 
+			this->label4->AutoSize = true;
+			this->label4->Font = (gcnew System::Drawing::Font(L"Nirmala UI", 13.8F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label4->Location = System::Drawing::Point(583, 22);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(369, 31);
+			this->label4->TabIndex = 17;
+			this->label4->Text = L"SCAN Disc Scheduling Algorithm";
 			// 
 			// pictureBox2
 			// 
@@ -306,17 +345,6 @@ namespace scan {
 			this->Request_textBox->Size = System::Drawing::Size(127, 33);
 			this->Request_textBox->TabIndex = 0;
 			// 
-			// label4
-			// 
-			this->label4->AutoSize = true;
-			this->label4->Font = (gcnew System::Drawing::Font(L"Nirmala UI", 13.8F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
-				static_cast<System::Byte>(0)));
-			this->label4->Location = System::Drawing::Point(583, 22);
-			this->label4->Name = L"label4";
-			this->label4->Size = System::Drawing::Size(369, 31);
-			this->label4->TabIndex = 17;
-			this->label4->Text = L"SCAN Disc Scheduling Algorithm";
-			// 
 			// Base
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
@@ -405,7 +433,24 @@ namespace scan {
 		}
 
 
+		int CalculateSeekCount()
+		{
+			if (result->Count <= 1) {
+				return 0; // No movement or single request
+			}
 
+			int seekCount = 0;
+			for (int i = 1; i < result->Count; i++) {
+				seekCount += Math::Abs(result[i] - result[i - 1]); 
+
+			}
+			int head = System::Convert::ToInt32(head_position_textBox->Text);
+
+			int firstDifference = head - result[0];
+			seekCount += firstDifference;
+
+			return seekCount;
+		}
 
 	private: System::Void Add_Request_button_Click(System::Object^ sender, System::EventArgs^ e) {
 
@@ -444,6 +489,9 @@ private: System::Void SCAN_button_Click(System::Object^ sender, System::EventArg
 	SCAN(movingRight);
 
 	PopulateServeSequenceListBox();
+	int seekCount = CalculateSeekCount();
+
+	Seek_Count_label->Text = seekCount.ToString();
 
 }
 private: System::Void pictureBox2_Click(System::Object^ sender, System::EventArgs^ e) {
@@ -455,6 +503,7 @@ private: System::Void pictureBox2_Click(System::Object^ sender, System::EventArg
 	for each (int shorted in sortedRequests) {
 		Shorted_listBox->Items->Add(shorted);
 	}
+	
 }
 };
 }
